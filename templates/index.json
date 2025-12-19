@@ -660,13 +660,32 @@
             "content_text": "<p>Card content goes here.</p>",
             "content_size_desktop": 16,
             "content_size_mobile": 14,
-            "text_alignment": "center"
+            "image_position": "left",
+            "image_width": 50,
+            "text_alignment": "left"
+          },
+          "blocks": {}
+        },
+        "group_card_UWFcxD": {
+          "type": "group_card",
+          "name": "Group Card",
+          "settings": {
+            "heading_text": "Card Heading",
+            "heading_size_desktop": 24,
+            "heading_size_mobile": 18,
+            "content_text": "<p>Card content goes here.</p>",
+            "content_size_desktop": 16,
+            "content_size_mobile": 14,
+            "image_position": "top",
+            "image_width": 50,
+            "text_alignment": "left"
           },
           "blocks": {}
         }
       },
       "block_order": [
-        "group_card_ULKTAG"
+        "group_card_ULKTAG",
+        "group_card_UWFcxD"
       ],
       "name": "t:names.custom_section",
       "settings": {
