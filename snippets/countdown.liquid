@@ -32,8 +32,7 @@
     gap: 0.5rem;
   }
 {% endstylesheet %}
-
-{% javascript %}
+<script>
   (function(){
     var container = document.currentScript.parentNode.querySelector('.countdown-section');
     if (!container) return;
@@ -57,4 +56,4 @@
     update();
     setInterval(update, 1000);
   })();
-{% endjavascript %}
+</script>
