@@ -1,0 +1,35 @@
+
+
+{% capture children %}
+  {% content_for 'blocks' %}
+{% endcapture %}
+
+{% render 'group_1', children: children, settings: block.settings %}
+
+{% schema %}
+{
+    "name": "Group 1",
+    "tag": null,
+    "blocks": [
+        {
+            "type": "@theme",
+        },
+        {
+            "type": "@app"
+        }
+    ],
+    "settings": [
+        {
+            "type": "text",
+            "id": "heaing",
+            "label": "Heading"       
+        }
+    ],
+    "presets": [
+        {
+            "name": "Group 1",
+            "category": "t:categories.layout"       
+        }
+    ]
+}
+{% endschema %}
