@@ -649,6 +649,22 @@
     },
     "section_WkB3YJ": {
       "type": "section",
+      "blocks": {
+        "countdown_JrKafE": {
+          "type": "countdown",
+          "name": "Countdown",
+          "settings": {
+            "target_date": "2025-12-31",
+            "target_time": "23:59",
+            "title": "Event Starts In",
+            "alignment": "center"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "countdown_JrKafE"
+      ],
       "name": "t:names.custom_section",
       "settings": {
         "content_direction": "column",
