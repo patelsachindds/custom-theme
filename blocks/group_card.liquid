@@ -91,6 +91,38 @@
     },
     {
       "type": "select",
+      "id": "image_position",
+      "label": "Image Position (Desktop)",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Image Width (Desktop)",
+      "default": 50,
+      "info": "Applies when position is Left or Right",
+      "visible_if": "{{ block.settings.image_position != 'top' }}"
+    },
+    {
+      "type": "select",
       "id": "text_alignment",
       "label": "Text Alignment",
       "options": [
