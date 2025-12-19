@@ -650,26 +650,23 @@
     "section_WkB3YJ": {
       "type": "section",
       "blocks": {
-        "group_1_k4CrdX": {
-          "type": "group_1",
-          "name": "Group 1",
+        "group_card_ULKTAG": {
+          "type": "group_card",
+          "name": "Group Card",
           "settings": {
-            "heaing": "ABc"
-          },
-          "blocks": {}
-        },
-        "group_1_mbkiEj": {
-          "type": "group_1",
-          "name": "Group 1",
-          "settings": {
-            "heaing": "XYZ"
+            "heading_text": "Card Heading",
+            "heading_size_desktop": 24,
+            "heading_size_mobile": 18,
+            "content_text": "<p>Card content goes here.</p>",
+            "content_size_desktop": 16,
+            "content_size_mobile": 14,
+            "text_alignment": "center"
           },
           "blocks": {}
         }
       },
       "block_order": [
-        "group_1_k4CrdX",
-        "group_1_mbkiEj"
+        "group_card_ULKTAG"
       ],
       "name": "t:names.custom_section",
       "settings": {
