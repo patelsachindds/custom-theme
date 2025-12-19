@@ -1,0 +1,109 @@
+{%- doc -%}
+  Renders a group card with responsive image, heading, and content.
+
+  @param {object} settings - The settings of the group card block.
+  @param {string} [class] - Custom classes for the group card.
+
+  @example
+  {% render 'group_card', settings: block.settings %}
+{%- enddoc -%}
+
+<div class="group-card {{ class }}">
+  <div class="group-card__image-wrapper">
+    {%- if settings.image_desktop != blank or settings.image_tablet != blank or settings.image_mobile != blank -%}
+      <picture>
+        {%- if settings.image_desktop != blank -%}
+          <source media="(min-width: 1025px)" srcset="{{ settings.image_desktop | image_url: width: 1500 }}">
+        {%- endif -%}
+        {%- if settings.image_tablet != blank -%}
+          <source media="(min-width: 768px)" srcset="{{ settings.image_tablet | image_url: width: 1000 }}">
+        {%- endif -%}
+        {%- if settings.image_mobile != blank -%}
+          <img
+            src="{{ settings.image_mobile | image_url: width: 800 }}"
+            alt="{{ settings.image_mobile.alt | escape }}"
+            loading="lazy"
+            width="{{ settings.image_mobile.width }}"
+            height="{{ settings.image_mobile.height }}"
+            class="group-card__image"
+          >
+        {%- elsif settings.image_desktop != blank -%}
+           <img
+            src="{{ settings.image_desktop | image_url: width: 1500 }}"
+            alt="{{ settings.image_desktop.alt | escape }}"
+            loading="lazy"
+            width="{{ settings.image_desktop.width }}"
+            height="{{ settings.image_desktop.height }}"
+            class="group-card__image"
+          >
+        {%- endif -%}
+      </picture>
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+  </div>
+
+  <div class="group-card__content" style="text-align: {{ settings.text_alignment }}">
+    {%- if settings.heading_text != blank -%}
+      <h3 class="group-card__heading" style="
+        --font-size-desktop: {{ settings.heading_size_desktop }}px;
+        --font-size-mobile: {{ settings.heading_size_mobile }}px;
+      ">
+        {{ settings.heading_text }}
+      </h3>
+    {%- endif -%}
+
+    {%- if settings.content_text != blank -%}
+      <div class="group-card__text" style="
+        --font-size-desktop: {{ settings.content_size_desktop }}px;
+        --font-size-mobile: {{ settings.content_size_mobile }}px;
+      ">
+        {{ settings.content_text }}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .group-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .group-card__image-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .group-card__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .group-card__content {
+    padding: 16px;
+  }
+
+  .group-card__heading {
+    margin: 0 0 8px;
+    font-size: var(--font-size-mobile);
+  }
+
+  .group-card__text {
+    font-size: var(--font-size-mobile);
+  }
+
+  @media screen and (min-width: 768px) {
+    .group-card__heading {
+      font-size: var(--font-size-desktop);
+    }
+
+    .group-card__text {
+      font-size: var(--font-size-desktop);
+    }
+  }
+{% endstylesheet %}
