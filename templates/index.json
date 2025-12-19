@@ -650,23 +650,87 @@
     "section_WkB3YJ": {
       "type": "section",
       "blocks": {
-        "group_card_ULKTAG": {
-          "type": "group_card",
-          "name": "Group Card",
+        "group_9zHX76": {
+          "type": "group",
+          "name": "t:names.group",
           "settings": {
-            "heading_text": "Card Heading",
-            "heading_size_desktop": 24,
-            "heading_size_mobile": 18,
-            "content_text": "<p>Card content goes here.</p>",
-            "content_size_desktop": 16,
-            "content_size_mobile": 14,
-            "text_alignment": "center"
+            "content_direction": "row",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
           },
-          "blocks": {}
+          "blocks": {
+            "group_card_GEXrDx": {
+              "type": "group_card",
+              "name": "Group Card",
+              "settings": {
+                "heading_text": "Card Heading",
+                "heading_size_desktop": 24,
+                "heading_size_mobile": 18,
+                "content_text": "<p>Card content goes here.</p>",
+                "content_size_desktop": 16,
+                "content_size_mobile": 14,
+                "image_position": "left",
+                "image_width": 35,
+                "text_alignment": "left"
+              },
+              "blocks": {}
+            },
+            "group_card_DWUMKX": {
+              "type": "group_card",
+              "name": "Group Card",
+              "settings": {
+                "heading_text": "Card Heading",
+                "heading_size_desktop": 24,
+                "heading_size_mobile": 18,
+                "content_text": "<p>Card content goes here.</p>",
+                "content_size_desktop": 16,
+                "content_size_mobile": 14,
+                "image_position": "top",
+                "image_width": 50,
+                "text_alignment": "left"
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "group_card_GEXrDx",
+            "group_card_DWUMKX"
+          ]
         }
       },
       "block_order": [
-        "group_card_ULKTAG"
+        "group_9zHX76"
       ],
       "name": "t:names.custom_section",
       "settings": {
