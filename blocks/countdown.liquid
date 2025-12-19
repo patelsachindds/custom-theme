@@ -1,0 +1,53 @@
+{% capture children %}
+  {% content_for 'blocks' %}
+{% endcapture %}
+
+{% render 'countdown', settings: block.settings %}
+
+{% schema %}
+{
+  "name": "Countdown",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.timer"
+    },
+    {
+      "type": "date",
+      "id": "target_date",
+      "label": "Target Date",
+      "default": "2025-12-31"
+    },
+    {
+      "type": "time",
+      "id": "target_time",
+      "label": "Target Time",
+      "default": "23:59"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Event Starts In"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown",
+      "category": "t:categories.layout"
+    }
+  ]
+}
+{% endschema %}
