@@ -38,6 +38,7 @@
     var container = document.currentScript.parentNode.querySelector('.countdown-section');
     if (!container) return;
     var targetDate = container.dataset.targetDate;
+    console.log("targetDate", targetDate);
     var targetTime = container.dataset.targetTime || '00:00';
     var target = new Date(targetDate + 'T' + targetTime + ':00');
     function update(){
