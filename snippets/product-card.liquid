@@ -110,7 +110,7 @@
       {% if block_settings.padding-block-start > 0 %}--zoom-out-padding-block-start: min(var(--padding-xs), {{ block_settings.padding-block-start | times: 0.7}}px);{% endif %}
       {% if block_settings.padding-block-end > 0 %}--zoom-out-padding-block-end: min(var(--padding-xs), {{ block_settings.padding-block-end | times: 0.7}}px);{% endif %}
     "
-  >
+    {% render 'wishlist-button', product: product, class: 'wishlist-button--card' %}
     {{ children }}
   </div>
 </product-card>

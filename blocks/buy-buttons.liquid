@@ -229,6 +229,10 @@
             can_add_to_cart: can_add_to_cart,
             form_obj: form
           %}
+          
+          <div class="wishlist-container-product-page" style="flex-basis: 100%; display: flex; justify-content: flex-start; margin-top: 1rem;">
+            {% render 'wishlist-button', product: product, class: 'wishlist-button--product' %}
+          </div>
         </div>
       {%- endform -%}
     </product-form-component>

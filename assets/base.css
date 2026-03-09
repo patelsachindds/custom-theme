@@ -4037,3 +4037,54 @@ text-component {
     font-size: max(1rem, 100%);
   }
 }
+
+/* Wishlist Button Styles */
+wishlist-button {
+  display: inline-block;
+}
+
+wishlist-button button {
+  background: transparent;
+  border: none;
+  padding: var(--padding-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-foreground);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+wishlist-button button:hover {
+  transform: scale(1.1);
+}
+
+wishlist-button svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+wishlist-button [data-active="true"] .icon-wishlist-solid {
+  color: var(--color-primary, #000); /* Use primary theme color or fallback to black */
+}
+
+/* Specific styling for when wishlist button is placed on a product card */
+.wishlist-button--card {
+  position: absolute;
+  top: var(--padding-sm);
+  right: var(--padding-sm);
+  z-index: 2; /* Ensure it floats above the product image */
+  background: var(--color-background);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.wishlist-button--card button {
+  padding: 8px; /* Slightly tighter padding for the floating circle */
+}
+
+.wishlist-button--card svg {
+  width: 18px;
+  height: 18px;
+}

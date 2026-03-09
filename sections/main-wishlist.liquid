@@ -1,0 +1,177 @@
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="title-wrapper-with-link title-wrapper--no-top-margin text-center">
+    <h1 class="title">{{ page.title | escape }}</h1>
+  </div>
+
+  <div class="wishlist-page-container">
+    <p class="wishlist-empty-message hidden text-center" style="margin-top: 2rem;">
+      Your wishlist is currently empty. <a href="{{ routes.all_products_collection_url }}" class="link">Continue shopping</a>.
+    </p>
+
+    {%- comment -%}
+      We'll create a grid that gets populated by JavaScript asynchronously based on localStorage.
+    {%- endcomment -%}
+    <div class="wishlist-grid grid grid--2-col grid--3-col-tablet grid--4-col-desktop">
+      <!-- Wishlist items will be rendered here by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const wishlistContainer = document.querySelector('.wishlist-grid');
+  const emptyMessage = document.querySelector('.wishlist-empty-message');
+  
+  function getWishlist() {
+    try {
+      const data = localStorage.getItem('theme_wishlist');
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function renderWishlist() {
+    const list = getWishlist();
+    
+    if (list.length === 0) {
+      wishlistContainer.innerHTML = '';
+      emptyMessage.classList.remove('hidden');
+      return;
+    }
+    
+    emptyMessage.classList.add('hidden');
+    wishlistContainer.innerHTML = ''; // Clear current
+    
+    // We need to fetch the product HTML for each item. 
+    // A clean way is to fetch the product page asynchronously and extract the product card block, 
+    // or use the Section Rendering API if we had a dedicated section.
+    // For simplicity, we'll fetch the product page and pull the card from recommendations or similar setup.
+    // An alternative is an Ajax request to `/?section_id=main-collection-product-grid&q=handle` but Shopify requires specific setups.
+    // Easiest robust method: Fetch product URL with a section ID that renders just the card, but since we don't have that,
+    // we fetch the standard page and parse the HTML (or use Shopify's Ajax API to get basic JSON and build a minimal card).
+    
+    // Using Shopify Ajax API for product info to build a basic card client-side:
+    list.forEach(item => {
+      fetch(`/products/${item.handle}.js`)
+        .then(response => response.json())
+        .then(product => {
+          const cardHtml = `
+            <div class="product-card-wrapper grid__item" style="position: relative;">
+              <div class="card card--standard card--media" style="--ratio-percent: 100%;">
+                <div class="card__inner">
+                  <div class="card__media">
+                    <div class="media media--transparent media--hover-effect">
+                      <img src="${product.featured_image}" alt="${product.title}" loading="lazy" class="motion-reduce" width="500" height="500">
+                    </div>
+                  </div>
+                  <!-- Inject the wishlist button explicitly so it floats -->
+                  <wishlist-button class="wishlist-button wishlist-button--card" data-product-id="${product.id}" data-product-handle="${product.handle}" data-active="true">
+                    <button type="button" class="button-unstyled wishlist-button__trigger" aria-pressed="true" aria-label="Remove from wishlist">
+                      <svg class="icon-wishlist-solid" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" role="presentation">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                      </svg>
+                    </button>
+                  </wishlist-button>
+                </div>
+                <div class="card__content">
+                  <div class="card__information">
+                    <h3 class="card__heading h5">
+                      <a href="${product.url}" class="full-unstyled-link">${product.title}</a>
+                    </h3>
+                    <div class="card-information">
+                      <div class="price">
+                        <div class="price__regular">
+                          <span class="price-item price-item--regular">
+                            ${Shopify.formatMoney(product.price, window.theme?.moneyFormat || '${{amount}}')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          wishlistContainer.insertAdjacentHTML('beforeend', cardHtml);
+          
+          // Attach event listener specifically for this newly rendered button since it's dynamic
+          const btn = wishlistContainer.lastElementChild.querySelector('wishlist-button');
+          if(btn && !customElements.get('wishlist-button')) {
+             // Let the custom element definition handle it if registered
+          }
+        })
+        .catch(err => {
+          console.error('Error loading wishlist item:', err);
+        });
+    });
+  }
+
+  // Helper for money formatting if not globally available
+  if (!window.Shopify) window.Shopify = {};
+  if (!Shopify.formatMoney) {
+    Shopify.formatMoney = function(cents, format) {
+      if (typeof cents == 'string') { cents = cents.replace('.',''); }
+      var value = '';
+      var placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+      var formatString = format || '${{amount}}';
+      function defaultOption(opt, def) { return (typeof opt == 'undefined' ? def : opt); }
+      function formatWithDelimiters(number, precision, thousands, decimal) {
+        precision = defaultOption(precision, 2);
+        thousands = defaultOption(thousands, ',');
+        decimal   = defaultOption(decimal, '.');
+        if (isNaN(number) || number == null) { return 0; }
+        number = (number / 100.0).toFixed(precision);
+        var parts   = number.split('.'),
+            dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands),
+            cents   = parts[1] ? (decimal + parts[1]) : '';
+        return dollars + cents;
+      }
+      switch(formatString.match(placeholderRegex)[1]) {
+        case 'amount': value = formatWithDelimiters(cents, 2); break;
+        case 'amount_no_decimals': value = formatWithDelimiters(cents, 0); break;
+        case 'amount_with_comma_separator': value = formatWithDelimiters(cents, 2, '.', ','); break;
+        case 'amount_no_decimals_with_comma_separator': value = formatWithDelimiters(cents, 0, '.', ','); break;
+      }
+      return formatString.replace(placeholderRegex, value);
+    };
+  }
+
+  renderWishlist();
+
+  // Re-render when wishlist updates
+  window.addEventListener('wishlist:updated', renderWishlist);
+});
+</script>
+
+{% schema %}
+{
+  "name": "Wishlist Template",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
