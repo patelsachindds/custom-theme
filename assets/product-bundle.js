@@ -29,8 +29,11 @@ export class ProductBundleComponent extends Component {
         this.checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 const item = checkbox.closest('.product-bundle__item');
-                if (item) {
-                    total += parseInt(item.dataset.price, 10);
+                if (item && item.dataset.price) {
+                    const price = parseInt(item.dataset.price, 10);
+                    if (!isNaN(price)) {
+                        total += price;
+                    }
                 }
             }
         });
