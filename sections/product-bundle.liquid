@@ -1,9 +1,10 @@
-  Frequently Bought Together Bundle Block v1.0.1
+{%- comment -%}
+  Frequently Bought Together Bundle Section
   Renders a bundle widget reading from product.metafields.custom.bundle_products
 {%- endcomment -%}
 
 {%- liquid
-  assign block_settings = block.settings
+  assign section_settings = section.settings
   assign bundle_products = product.metafields.custom.bundle_products.value
   assign has_bundle = false
 
@@ -16,10 +17,10 @@
 -%}
 
 {%- if has_bundle -%}
-  <product-bundle-component class="product-bundle spacing-style color-{{ block_settings.color_scheme }}" style="{% render 'spacing-style', settings: block_settings %}" data-main-product-id="{{ product.selected_or_first_available_variant.id }}">
+  <product-bundle-component class="product-bundle spacing-style color-{{ section_settings.color_scheme }}" style="{% render 'spacing-style', settings: section_settings %}" data-main-product-id="{{ product.selected_or_first_available_variant.id }}">
     
-    {%- if block_settings.heading != blank -%}
-      <h3 class="product-bundle__heading">{{ block_settings.heading }}</h3>
+    {%- if section_settings.heading != blank -%}
+      <h3 class="product-bundle__heading">{{ section_settings.heading }}</h3>
     {%- endif -%}
 
     <div class="product-bundle__items">
@@ -214,6 +215,14 @@
       "unit": "px",
       "default": 16
     }
-  ]
+  ],
+  "presets": [
+    {
+      "name": "Frequently Bought Together"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
 }
 {% endschema %}
