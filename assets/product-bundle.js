@@ -91,13 +91,24 @@ export class ProductBundleComponent extends Component {
                 return;
             }
 
-            // Simple AJAX request without section rendering or drawer integration
+            // Prepare AJAX request with section rendering to refresh cart UI
+            const cartItemsComponents = document.querySelectorAll('cart-items-component');
+            const sections = Array.from(cartItemsComponents)
+                .map(item => item.dataset.sectionId)
+                .filter(Boolean);
+
+            const formData = {
+                items: itemsToAdd,
+                sections: sections.join(',')
+            };
+
             const response = await fetch(window.Shopify.routes.root + 'cart/add.js', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ items: itemsToAdd })
+                body: JSON.stringify(formData)
             });
 
             const result = await response.json();
@@ -106,8 +117,34 @@ export class ProductBundleComponent extends Component {
                 throw new Error(result.description || 'Failed to add items to cart');
             }
 
-            // Redirect to cart page after success
-            window.location.href = window.Shopify.routes.root + 'cart';
+            // Reset button state
+            this.submitButton.disabled = false;
+            this.submitButton.textContent = originalText;
+
+            // 1. Dispatch theme-specific update event to refresh cart content
+            // Defensive: ensure sections is at least an empty object
+            const cartUpdateEvent = new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: {
+                    sourceId: this.id,
+                    resource: result,
+                    data: {
+                        sections: result.sections || {},
+                        source: 'product-bundle'
+                    }
+                }
+            });
+            document.dispatchEvent(cartUpdateEvent);
+
+            // 2. Automatically open the cart drawer
+            const cartDrawer = document.querySelector('cart-drawer-component');
+            if (cartDrawer && typeof cartDrawer.open === 'function') {
+                cartDrawer.open();
+            }
+
+            // 3. Fallback/Legacy events
+            document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
+            window.dispatchEvent(new Event('cart:updated'));
 
         } catch (error) {
             console.error('Error adding bundle to cart:', error);
