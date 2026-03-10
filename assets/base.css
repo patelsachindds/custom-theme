@@ -3983,10 +3983,6 @@ text-component {
   z-index: 1;
 }
 
-.free-shipping-bar__range-labels {
-  background-color: rgb(var(--color-foreground-rgb) / var(--opacity-60));
-}
-
 ::-webkit-scrollbar-thumb {
   background-color: rgb(var(--color-foreground-rgb) / var(--opacity-40));
   border-radius: 20px;
