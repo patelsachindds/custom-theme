@@ -1,161 +1,189 @@
+import { Component } from '@theme/component';
+
 /**
- * Product Bundle Component
- * Manages checking/unchecking bundle items, calculating totals, and adding multiple items to the cart using Shopify AJAX API.
+ * A custom element that manages a product bundle.
  */
+export class ProductBundleComponent extends Component {
+    connectedCallback() {
+        super.connectedCallback();
 
-class ProductBundleComponent extends HTMLElement {
-    constructor() {
-        super();
-        this.items = Array.from(this.querySelectorAll('.product-bundle__item'));
-        this.checkboxes = Array.from(this.querySelectorAll('.product-bundle__checkbox'));
-        this.totalPriceElement = this.querySelector('[data-bundle-total]');
-        this.submitButton = this.querySelector('.product-bundle__submit');
+        this.submitButton = this.querySelector('.product-bundle__add-button');
+        this.checkboxes = this.querySelectorAll('.product-bundle__checkbox');
+        this.items = this.querySelectorAll('.product-bundle__item');
         this.errorElement = this.querySelector('.product-bundle__error');
-        this.moneyFormat = window.theme?.moneyFormat || '${{amount}}'; // Fallback
-
-        this.init();
-    }
-
-    init() {
-        this.calculateTotal();
-
-        this.checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener('change', () => this.calculateTotal());
-        });
+        this.totalPriceElement = this.querySelector('.product-bundle__total-price');
 
         if (this.submitButton) {
-            this.submitButton.addEventListener('click', (e) => this.addToCart(e));
+            this.submitButton.addEventListener('click', this.addToCart.bind(this));
         }
+
+        this.checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', this.updateTotal.bind(this));
+        });
+
+        this.updateTotal();
     }
 
-    calculateTotal() {
+    updateTotal() {
         let total = 0;
-        let selectedCount = 0;
-
-        this.items.forEach((item) => {
-            const checkbox = item.querySelector('.product-bundle__checkbox');
-            if (checkbox && checkbox.checked) {
-                const price = parseInt(item.dataset.price, 10);
-                if (!isNaN(price)) {
-                    total += price;
-                    selectedCount++;
-                }
+        this.checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                total += parseInt(checkbox.dataset.price, 10);
             }
         });
 
         if (this.totalPriceElement) {
-            this.totalPriceElement.innerHTML = this.formatMoney(total, this.moneyFormat);
-        }
-
-        if (this.submitButton) {
-            if (selectedCount === 0) {
-                this.submitButton.disabled = true;
-                this.submitButton.textContent = 'Select items to add';
-            } else {
-                this.submitButton.disabled = false;
-                this.submitButton.textContent = `Add ${selectedCount} item${selectedCount > 1 ? 's' : ''} to Cart`;
-            }
+            this.totalPriceElement.textContent = this.formatMoney(total);
         }
     }
 
     async addToCart(event) {
-        event.preventDefault();
+        if (event) event.preventDefault();
+
         if (this.submitButton.disabled) return;
 
-        this.errorElement.classList.add('hidden');
         const originalText = this.submitButton.textContent;
         this.submitButton.disabled = true;
-        this.submitButton.innerHTML = '<span class="loading-spinner"></span> Adding...';
+        this.submitButton.textContent = 'Adding...';
 
-        const itemsToAdd = [];
-        const bundleId = Date.now().toString(); // Shared ID for all items in this bundle add action
-        const mainVariantId = parseInt(this.dataset.mainVariantId, 10);
-
-        this.items.forEach((item) => {
-            const checkbox = item.querySelector('.product-bundle__checkbox');
-            if (checkbox && checkbox.checked) {
-                const variantId = parseInt(item.dataset.variantId, 10);
-                const role = (variantId === mainVariantId) ? 'main' : 'member';
-
-                itemsToAdd.push({
-                    id: variantId,
-                    quantity: 1,
-                    properties: {
-                        '_bundleId': bundleId,
-                        '_bundleRole': role
-                    }
-                });
-            }
-        });
-
-        if (itemsToAdd.length === 0) {
-            this.submitButton.disabled = false;
-            this.submitButton.textContent = originalText;
-            return;
+        if (this.errorElement) {
+            this.errorElement.classList.add('hidden');
+            this.errorElement.textContent = '';
         }
 
         try {
+            const bundleId = Date.now().toString();
+            const itemsToAdd = [];
+            const mainVariantId = this.dataset.mainVariantId;
+
+            // Add main product
+            if (mainVariantId) {
+                itemsToAdd.push({
+                    id: mainVariantId,
+                    quantity: 1,
+                    properties: {
+                        '_bundleId': bundleId,
+                        '_bundleRole': 'main'
+                    }
+                });
+            }
+
+            // Add selected members
+            this.checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const variantId = checkbox.dataset.variantId;
+                    // Only add if it's not the main product (prevent double adding if main is in checkbox list)
+                    if (variantId && variantId !== mainVariantId) {
+                        itemsToAdd.push({
+                            id: variantId,
+                            quantity: 1,
+                            properties: {
+                                '_bundleId': bundleId,
+                                '_bundleRole': 'member'
+                            }
+                        });
+                    }
+                }
+            });
+
+            if (itemsToAdd.length === 0) {
+                this.submitButton.disabled = false;
+                this.submitButton.textContent = originalText;
+                return;
+            }
+
+            // Prepare AJAX request with section rendering to refresh cart UI
+            const cartItemsComponents = document.querySelectorAll('cart-items-component');
+            const sections = Array.from(cartItemsComponents)
+                .map(item => item.dataset.sectionId)
+                .filter(Boolean);
+
+            const formData = {
+                items: itemsToAdd,
+                sections: sections.join(',')
+            };
+
             const response = await fetch(window.Shopify.routes.root + 'cart/add.js', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ items: itemsToAdd })
+                body: JSON.stringify(formData)
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.description || 'Error adding to cart');
+                throw new Error(result.description || 'Failed to add items to cart');
             }
 
-            // Success! 
+            // Reset button state
             this.submitButton.disabled = false;
             this.submitButton.textContent = originalText;
 
+            // 1. Dispatch theme-specific update event to refresh cart content
+            const cartUpdateEvent = new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: {
+                    sourceId: this.id,
+                    resource: result,
+                    data: {
+                        sections: result.sections || {},
+                        source: 'product-bundle'
+                    }
+                }
+            });
+            document.dispatchEvent(cartUpdateEvent);
 
-            // Trigger theme cart updates globally
-            document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { source: 'product-bundle' } }));
+            // 2. Automatically open the cart drawer
+            const cartDrawer = document.querySelector('cart-drawer-component');
+            if (cartDrawer && typeof cartDrawer.open === 'function') {
+                cartDrawer.open();
+            }
+
+            // 3. Fallback/Legacy events
             document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
-            window.dispatchEvent(new Event('cart:updated')); // Keep as secondary fallback for non-theme listeners
+            window.dispatchEvent(new Event('cart:updated'));
 
         } catch (error) {
             console.error('Error adding bundle to cart:', error);
-            this.errorElement.textContent = error.message;
-            this.errorElement.classList.remove('hidden');
+            if (this.errorElement) {
+                this.errorElement.textContent = error.message;
+                this.errorElement.classList.remove('hidden');
+            }
             this.submitButton.disabled = false;
             this.submitButton.textContent = originalText;
         }
     }
 
-    // Basic money formatter copied from liquid/standard JS to act as safe fallback
-    formatMoney(cents, format) {
-        if (typeof cents == 'string') { cents = cents.replace('.', ''); }
-        let value = '';
-        const placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
-        const formatString = format || '${{amount}}';
+    formatMoney(cents) {
+        // Use theme standard formatter or fallback
+        if (window.theme?.currency?.formatMoney) {
+            return window.theme.currency.formatMoney(cents);
+        }
 
-        function defaultOption(opt, def) { return (typeof opt == 'undefined' ? def : opt); }
+        const format = (opt, def) => (typeof opt === 'undefined' ? def : opt);
+        const formatWithDelimiters = (number, precision, thousands, decimal) => {
+            precision = format(precision, 2);
+            thousands = format(thousands, ',');
+            decimal = format(decimal, '.');
 
-        function formatWithDelimiters(number, precision, thousands, decimal) {
-            precision = defaultOption(precision, 2);
-            thousands = defaultOption(thousands, ',');
-            decimal = defaultOption(decimal, '.');
-            if (isNaN(number) || number == null) { return 0; }
+            if (isNaN(number) || number == null) return 0;
+
             number = (number / 100.0).toFixed(precision);
-            const parts = number.split('.'),
-                dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands),
-                cents = parts[1] ? (decimal + parts[1]) : '';
-            return dollars + cents;
-        }
 
-        switch (formatString.match(placeholderRegex)[1]) {
-            case 'amount': value = formatWithDelimiters(cents, 2); break;
-            case 'amount_no_decimals': value = formatWithDelimiters(cents, 0); break;
-            case 'amount_with_comma_separator': value = formatWithDelimiters(cents, 2, '.', ','); break;
-            case 'amount_no_decimals_with_comma_separator': value = formatWithDelimiters(cents, 0, '.', ','); break;
-        }
-        return formatString.replace(placeholderRegex, value);
+            const parts = number.split('.');
+            const dollarsAmount = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+            const centsAmount = parts[1] ? decimal + parts[1] : '';
+
+            return dollarsAmount + centsAmount;
+        };
+
+        return '$' + formatWithDelimiters(cents, 2, ',', '.');
     }
 }
 
-customElements.define('product-bundle-component', ProductBundleComponent);
+if (!customElements.get('product-bundle-component')) {
+    customElements.define('product-bundle-component', ProductBundleComponent);
+}

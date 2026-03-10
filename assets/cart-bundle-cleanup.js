@@ -65,7 +65,10 @@ async function cleanupOrphanBundleItems() {
                     bubbles: true,
                     detail: {
                         resource: await updateResponse.json(),
-                        data: {} // Empty sections so it triggers a full fetch
+                        data: {
+                            sections: {},
+                            source: 'bundle-cleanup'
+                        }
                     }
                 });
                 document.dispatchEvent(cartUpdateEvent);
@@ -90,8 +93,7 @@ const debouncedBundleCleanup = () => {
 
 // Listen for standard cart update events
 document.addEventListener('cart:update', (e) => {
-    // Avoid infinite loops if the event was triggered by our own cleanup
-    if (e.detail?.source === 'bundle-cleanup') return;
+    if (e.detail?.data?.source === 'bundle-cleanup') return;
     debouncedBundleCleanup();
 });
 document.addEventListener('cart:change', debouncedBundleCleanup);

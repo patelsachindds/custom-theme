@@ -227,7 +227,7 @@ class CartItemsComponent extends Component {
     }
     if (event.target === this) return;
 
-    const cartItemsHtml = event.detail.data.sections?.[this.sectionId];
+    const cartItemsHtml = event.detail.data?.sections?.[this.sectionId];
     if (cartItemsHtml) {
       morphSection(this.sectionId, cartItemsHtml);
 
