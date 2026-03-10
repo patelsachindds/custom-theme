@@ -1,0 +1,29 @@
+{%- liquid
+  assign threshold = settings.free_shipping_threshold | plus: 0
+  assign cart_total = cart.total_price
+  assign remaining = threshold | minus: cart_total
+  assign percentage = cart_total | times: 1.0 | divided_by: threshold | times: 100 | at_most: 100
+-%}
+
+{%- if threshold > 0 -%}
+  <div class="free-shipping-bar" data-threshold="{{ threshold }}">
+    <div class="free-shipping-bar__message cart-primary-typography">
+      {%- if remaining > 0 -%}
+        {%- assign remaining_money = remaining | money -%}
+        <strong>You're only {{ remaining_money }} away from Free Shipping!</strong>
+      {%- else -%}
+        <strong>{{ settings.free_shipping_success_message }}</strong>
+      {%- endif -%}
+    </div>
+    <div class="free-shipping-bar__progress-container">
+      <div 
+        class="free-shipping-bar__progress-fill" 
+        style="width: {{ percentage }}%;"
+        role="progressbar"
+        aria-valuenow="{{ percentage }}"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      ></div>
+    </div>
+  </div>
+{%- endif -%}

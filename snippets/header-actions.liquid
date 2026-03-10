@@ -109,11 +109,11 @@
         scroll-lock
         cart-summary-sticky="true"
       >
-        <div class="cart-drawer__inner">
           <cart-items-component
             class="cart-items-component"
             data-section-id="{{ section.id }}"
           >
+            {% render 'free-shipping-bar' %}
             {%- if cart.empty? -%}
               <div class="cart-drawer__header">
                 <button

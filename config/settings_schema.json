@@ -1750,6 +1750,23 @@
         "default": true
       },
       {
+        "type": "header",
+        "content": "Free shipping bar"
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold",
+        "info": "Set to 0 to disable. Enter amount in cents (e.g. 10000 for $100).",
+        "default": 10000
+      },
+      {
+        "type": "textarea",
+        "id": "free_shipping_success_message",
+        "label": "Success message",
+        "default": "You've unlocked free shipping!"
+      },
+      {
         "type": "checkbox",
         "id": "show_installments",
         "label": "t:settings.installments",
@@ -1761,13 +1778,12 @@
         "label": "t:settings.checkout_buttons",
         "info": "t:info.checkout_buttons",
         "default": true
-      },
-      {
-        "type": "url",
-        "id": "empty_cart_button_link",
-        "label": "t:settings.empty_cart_button_link",
-        "default": "/collections/all"
-      },
+      }
+    ]
+  },
+  {
+    "name": "t:names.product_media",
+    "settings": [
       {
         "type": "header",
         "content": "t:content.product_media"
