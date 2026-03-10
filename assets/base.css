@@ -3930,6 +3930,63 @@ text-component {
   background-color: transparent;
 }
 
+.free-shipping-bar__progress-container {
+  height: 24px;
+  /* Increased height for internal text */
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.free-shipping-bar__progress-fill {
+  height: 100%;
+  background-color: #e62e2e;
+  /* Vibrant Red */
+  background-image: linear-gradient(45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent);
+  background-size: 40px 40px;
+  border-radius: 12px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  animation: progress-stripes 2s linear infinite;
+}
+
+@keyframes progress-stripes {
+  from {
+    background-position: 40px 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+.free-shipping-bar__percentage-text {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.free-shipping-bar__range-labels {
+  background-color: rgb(var(--color-foreground-rgb) / var(--opacity-60));
+}
+
 ::-webkit-scrollbar-thumb {
   background-color: rgb(var(--color-foreground-rgb) / var(--opacity-40));
   border-radius: 20px;

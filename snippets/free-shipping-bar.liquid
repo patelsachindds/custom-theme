@@ -23,7 +23,11 @@
         aria-valuenow="{{ percentage }}"
         aria-valuemin="0"
         aria-valuemax="100"
-      ></div>
+      >
+        <span class="free-shipping-bar__percentage-text">
+          {{ percentage | round }}% Complete
+        </span>
+      </div>
     </div>
     <div class="free-shipping-bar__range-labels">
       <span>{{ 0 | money }}</span>
