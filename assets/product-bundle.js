@@ -7,7 +7,7 @@ export class ProductBundleComponent extends Component {
     connectedCallback() {
         super.connectedCallback();
 
-        this.submitButton = this.querySelector('.product-bundle__add-button');
+        this.submitButton = this.querySelector('.product-bundle__submit');
         this.checkboxes = this.querySelectorAll('.product-bundle__checkbox');
         this.items = this.querySelectorAll('.product-bundle__item');
         this.errorElement = this.querySelector('.product-bundle__error');
