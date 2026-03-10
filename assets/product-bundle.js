@@ -31,6 +31,7 @@ export class ProductBundleComponent extends Component {
         this.checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 total += parseInt(checkbox.dataset.price, 10);
+                console.log("total",total);
             }
         });
 
