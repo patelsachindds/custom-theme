@@ -65,16 +65,25 @@ class ProductBundleComponent extends HTMLElement {
         this.errorElement.classList.add('hidden');
         const originalText = this.submitButton.textContent;
         this.submitButton.disabled = true;
-        this.submitButton.innerHTML = '<span class="loading-spinner"></span> Adding...'; // Need generic loader style
+        this.submitButton.innerHTML = '<span class="loading-spinner"></span> Adding...';
 
         const itemsToAdd = [];
+        const bundleId = Date.now().toString(); // Shared ID for all items in this bundle add action
+        const mainVariantId = parseInt(this.dataset.mainVariantId, 10);
 
         this.items.forEach((item) => {
             const checkbox = item.querySelector('.product-bundle__checkbox');
             if (checkbox && checkbox.checked) {
+                const variantId = parseInt(item.dataset.variantId, 10);
+                const role = (variantId === mainVariantId) ? 'main' : 'member';
+
                 itemsToAdd.push({
-                    id: parseInt(item.dataset.variantId, 10),
-                    quantity: 1
+                    id: variantId,
+                    quantity: 1,
+                    properties: {
+                        '_bundleId': bundleId,
+                        '_bundleRole': role
+                    }
                 });
             }
         });
@@ -99,18 +108,13 @@ class ProductBundleComponent extends HTMLElement {
                 throw new Error(errorData.description || 'Error adding to cart');
             }
 
-            // Success! Revert button state
+            // Success! 
             this.submitButton.disabled = false;
             this.submitButton.textContent = originalText;
 
-            // Trigger theme cart updates globally. 
-            // Emitting standard Shopify theme events so drawers open automatically.
+            // Trigger theme cart updates globally
             window.dispatchEvent(new Event('cart:updated'));
-
-            // Secondary fallback depending on exact cart drawer implementation
-            document.documentElement.dispatchEvent(new CustomEvent('cart:change', {
-                bubbles: true
-            }));
+            document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
 
         } catch (error) {
             console.error('Error adding bundle to cart:', error);
