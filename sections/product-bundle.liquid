@@ -17,7 +17,7 @@
     endif
   endif
 -%}
-=={{ product.metafields.custom.bundle_products.value | json }}
+=={{ bundle_products.size | json }}
 
 {%- if has_bundle -%}
   {%- assign main_variant = product.selected_or_first_available_variant -%}
