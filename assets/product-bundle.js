@@ -112,9 +112,11 @@ class ProductBundleComponent extends HTMLElement {
             this.submitButton.disabled = false;
             this.submitButton.textContent = originalText;
 
+
             // Trigger theme cart updates globally
-            window.dispatchEvent(new Event('cart:updated'));
+            document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { source: 'product-bundle' } }));
             document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
+            window.dispatchEvent(new Event('cart:updated')); // Keep as secondary fallback for non-theme listeners
 
         } catch (error) {
             console.error('Error adding bundle to cart:', error);

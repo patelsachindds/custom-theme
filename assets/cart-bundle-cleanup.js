@@ -1,5 +1,5 @@
 /**
- * Cart Bundle Cleanup Logic v1.0.1
+ * Cart Bundle Cleanup Logic v1.0.2
  * Checks the cart for "orphan" bundle members that no longer have their main product.
  * Removes them automatically to maintain bundle integrity.
  */
@@ -7,7 +7,9 @@
 async function cleanupOrphanBundleItems() {
     console.log('Bundle Cleanup: Checking cart items...');
     try {
-        const response = await fetch(window.Shopify.routes.root + 'cart.js');
+        const response = await fetch(window.Shopify.routes.root + 'cart.js', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
         const cart = await response.json();
 
         if (!cart.items || cart.items.length === 0) {
@@ -15,7 +17,6 @@ async function cleanupOrphanBundleItems() {
             return;
         }
 
-        // Map to track if a bundleId has its 'main' product present
         const bundleStatus = {}; // { bundleId: hasMain }
         const itemsToRemove = {}; // { lineKey: quantity 0 }
 
@@ -48,15 +49,29 @@ async function cleanupOrphanBundleItems() {
             console.log('Bundle Cleanup: Removing orphan items...', itemsToRemove);
             const updateResponse = await fetch(window.Shopify.routes.root + 'cart/update.js', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: JSON.stringify({ updates: itemsToRemove })
             });
 
             if (updateResponse.ok) {
-                console.log('Bundle Cleanup: Success. Refreshing cart UI.');
-                // Trigger refresh if we actually removed something
+                console.log('Bundle Cleanup: Success. Refreshing Theme UI.');
+
+                // Trigger the theme's own cart update event (ThemeEvents.cartUpdate is 'cart:update')
+                // We pass an empty detail so CartItemsComponent calls sectionRenderer.renderSection
+                const cartUpdateEvent = new CustomEvent('cart:update', {
+                    bubbles: true,
+                    detail: {
+                        resource: await updateResponse.json(),
+                        data: {} // Empty sections so it triggers a full fetch
+                    }
+                });
+                document.dispatchEvent(cartUpdateEvent);
+
+                // Fallback for newer theme versions or different components
                 window.dispatchEvent(new Event('cart:updated'));
-                document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
             }
         } else {
             console.log('Bundle Cleanup: No orphans found.');
@@ -66,44 +81,44 @@ async function cleanupOrphanBundleItems() {
     }
 }
 
-// Listen for cart updates to trigger cleanup
-// Debounced to avoid race conditions with multiple rapid updates
 let bundleCleanupTimeout;
 const debouncedBundleCleanup = () => {
     console.log('Bundle Cleanup: Trigger event detected. Scheduling check...');
     clearTimeout(bundleCleanupTimeout);
-    bundleCleanupTimeout = setTimeout(cleanupOrphanBundleItems, 1000);
+    bundleCleanupTimeout = setTimeout(cleanupOrphanBundleItems, 800);
 };
 
-// Hook into common cart event names
-document.addEventListener('cart:updated', debouncedBundleCleanup);
+// Listen for standard cart update events
+document.addEventListener('cart:update', (e) => {
+    // Avoid infinite loops if the event was triggered by our own cleanup
+    if (e.detail?.source === 'bundle-cleanup') return;
+    debouncedBundleCleanup();
+});
 document.addEventListener('cart:change', debouncedBundleCleanup);
 
-// ALSO Hook into the Fetch API directly
-// This ensures that even if the theme doesn't fire an event, we catch the cart update
+// Hook into Fetch to catch AJAX updates from theme
 if (!window._bundleFetchIntercepted) {
     window._bundleFetchIntercepted = true;
     const originalFetch = window.fetch;
     window.fetch = function () {
+        const url = arguments[0];
+        const isCartUpdateCall = typeof url === 'string' &&
+            (url.includes('/cart/add') ||
+                url.includes('/cart/change') ||
+                url.includes('/cart/update') ||
+                url.includes('/cart/clear'));
+
         return originalFetch.apply(this, arguments).then(response => {
-            const url = arguments[0];
-            if (typeof url === 'string') {
-                const isCartUrl = url.includes('/cart/add') ||
-                    url.includes('/cart/change') ||
-                    url.includes('/cart/update') ||
-                    url.includes('/cart/clear');
-                if (isCartUrl && response.ok) {
-                    debouncedBundleCleanup();
-                }
+            if (isCartUpdateCall && response.ok) {
+                // If it's a cart update, schedule a cleanup check
+                debouncedBundleCleanup();
             }
             return response;
         });
     };
 }
 
-/**
- * Initial check on page load to ensure clean state
- */
+// Initial check on page load
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(cleanupOrphanBundleItems, 1500);
+    setTimeout(cleanupOrphanBundleItems, 1000);
 });
