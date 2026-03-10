@@ -1754,11 +1754,15 @@
         "content": "Free shipping bar"
       },
       {
-        "type": "number",
+        "type": "range",
         "id": "free_shipping_threshold",
         "label": "Free shipping threshold",
-        "info": "Set to 0 to disable. Enter amount in cents (e.g. 10000 for $100).",
-        "default": 10000
+        "min": 0,
+        "max": 30000,
+        "step": 500,
+        "unit": "¢",
+        "default": 10000,
+        "info": "Set to 0 to disable. Amount in cents (e.g. 10000 for $100)."
       },
       {
         "type": "textarea",
