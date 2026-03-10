@@ -30,7 +30,7 @@ export class ProductBundleComponent extends Component {
         let total = 0;
         this.checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-<<<<<<< HEAD
+// <<<<<<< HEAD
                 const item = checkbox.closest('.product-bundle__item');
                 if (item && item.dataset.price) {
                     const price = parseInt(item.dataset.price, 10);
@@ -38,10 +38,10 @@ export class ProductBundleComponent extends Component {
                         total += price;
                     }
                 }
-=======
+// =======
                 total += parseInt(checkbox.dataset.price, 10);
                 console.log("total",total);
->>>>>>> c8457dcb1732d55a78559eac474b9a5a3056ac2c
+// >>>>>>> c8457dcb1732d55a78559eac474b9a5a3056ac2c
             }
         });
 
