@@ -72,7 +72,6 @@ export class ProductBundleComponent extends Component {
             this.checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
                     const variantId = checkbox.dataset.variantId;
-                    // Only add if it's not the main product (prevent double adding if main is in checkbox list)
                     if (variantId && variantId !== mainVariantId) {
                         itemsToAdd.push({
                             id: variantId,
@@ -92,24 +91,13 @@ export class ProductBundleComponent extends Component {
                 return;
             }
 
-            // Prepare AJAX request with section rendering to refresh cart UI
-            const cartItemsComponents = document.querySelectorAll('cart-items-component');
-            const sections = Array.from(cartItemsComponents)
-                .map(item => item.dataset.sectionId)
-                .filter(Boolean);
-
-            const formData = {
-                items: itemsToAdd,
-                sections: sections.join(',')
-            };
-
+            // Simple AJAX request without section rendering or drawer integration
             const response = await fetch(window.Shopify.routes.root + 'cart/add.js', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ items: itemsToAdd })
             });
 
             const result = await response.json();
@@ -118,33 +106,8 @@ export class ProductBundleComponent extends Component {
                 throw new Error(result.description || 'Failed to add items to cart');
             }
 
-            // Reset button state
-            this.submitButton.disabled = false;
-            this.submitButton.textContent = originalText;
-
-            // 1. Dispatch theme-specific update event to refresh cart content
-            const cartUpdateEvent = new CustomEvent('cart:update', {
-                bubbles: true,
-                detail: {
-                    sourceId: this.id,
-                    resource: result,
-                    data: {
-                        sections: result.sections || {},
-                        source: 'product-bundle'
-                    }
-                }
-            });
-            document.dispatchEvent(cartUpdateEvent);
-
-            // 2. Automatically open the cart drawer
-            const cartDrawer = document.querySelector('cart-drawer-component');
-            if (cartDrawer && typeof cartDrawer.open === 'function') {
-                cartDrawer.open();
-            }
-
-            // 3. Fallback/Legacy events
-            document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
-            window.dispatchEvent(new Event('cart:updated'));
+            // Redirect to cart page after success
+            window.location.href = window.Shopify.routes.root + 'cart';
 
         } catch (error) {
             console.error('Error adding bundle to cart:', error);
@@ -158,7 +121,6 @@ export class ProductBundleComponent extends Component {
     }
 
     formatMoney(cents) {
-        // Use theme standard formatter or fallback
         if (window.theme?.currency?.formatMoney) {
             return window.theme.currency.formatMoney(cents);
         }
