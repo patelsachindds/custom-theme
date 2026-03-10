@@ -1,5 +1,5 @@
 {%- comment -%}
-  Frequently Bought Together Bundle Section v1.0.2
+  Frequently Bought Together Bundle Section v1.0.3
   Renders a bundle widget reading from product.metafields.custom.bundle_products
 {%- endcomment -%}
 
@@ -24,7 +24,7 @@
     {%- endif -%}
 
     <div class="product-bundle__items">
-      {%- comment -%} Main Product (Always included, disabled checkbox) {%- endcomment -%}
+      {%- comment -%} Main Product (Always included) {%- endcomment -%}
       <div class="product-bundle__item" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-price="{{ product.selected_or_first_available_variant.price }}">
         <div class="product-bundle__checkbox-wrapper">
           <input type="checkbox" id="bundle-item-main" checked disabled class="product-bundle__checkbox">
@@ -174,10 +174,12 @@
 {% schema %}
 {
   "name": "Frequently Bought Together",
+  "tag": "section",
+  "class": "section-bundle",
   "settings": [
     {
       "type": "paragraph",
-      "content": "Requires a product metafield: \"custom.bundle_products\" of type list.product_reference."
+      "content": "Requires a product metafield: custom.bundle_products"
     },
     {
       "type": "text",
@@ -197,7 +199,7 @@
     },
     {
       "type": "range",
-      "id": "padding-block-start",
+      "id": "padding_block_start",
       "label": "Top padding",
       "min": 0,
       "max": 100,
@@ -207,7 +209,7 @@
     },
     {
       "type": "range",
-      "id": "padding-block-end",
+      "id": "padding_block_end",
       "label": "Bottom padding",
       "min": 0,
       "max": 100,
@@ -222,7 +224,10 @@
     }
   ],
   "disabled_on": {
-    "groups": ["header", "footer"]
+    "groups": [
+      "header",
+      "footer"
+    ]
   }
 }
 {% endschema %}
