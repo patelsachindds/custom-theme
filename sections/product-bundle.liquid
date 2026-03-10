@@ -9,7 +9,7 @@
   assign has_bundle = false
 
   if bundle_products != blank
-    assign bundle_size = bundle_products.count
+    assign bundle_size = bundle_products.size
     if bundle_size > 0
       assign has_bundle = true
     endif
@@ -17,7 +17,7 @@
 -%}
 
 {%- if has_bundle -%}
-  <product-bundle-component class="product-bundle spacing-style color-{{ section_settings.color_scheme }}" style="{% render 'spacing-style', settings: section_settings %}" data-main-product-id="{{ product.selected_or_first_available_variant.id }}">
+  <product-bundle-component class="product-bundle spacing-style color-{{ section_settings.color_scheme }}" style="{% render 'spacing-style', settings: section_settings %}" data-main-variant-id="{{ product.selected_or_first_available_variant.id }}">
     
     {%- if section_settings.heading != blank -%}
       <h3 class="product-bundle__heading">{{ section_settings.heading }}</h3>
@@ -30,9 +30,9 @@
           <input type="checkbox" id="bundle-item-main" checked disabled class="product-bundle__checkbox">
         </div>
         <div class="product-bundle__image-wrapper">
-          {%- assign image = product.selected_or_first_available_variant.featured_image | default: product.featured_image -%}
-          {%- if image -%}
-            <img src="{{ image | image_url: width: 100 }}" alt="{{ product.title | escape }}" loading="lazy" width="50" height="50" class="product-bundle__image">
+          {%- assign main_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image -%}
+          {%- if main_image -%}
+            <img src="{{ main_image | image_url: width: 100 }}" alt="{{ product.title | escape }}" loading="lazy" width="50" height="50" class="product-bundle__image">
           {%- endif -%}
         </div>
         <div class="product-bundle__info">
@@ -44,14 +44,14 @@
       {%- comment -%} Metafield Bundle Products {%- endcomment -%}
       {%- for bundle_product in bundle_products -%}
         {%- if bundle_product.available -%}
+          {%- assign bundle_image = bundle_product.selected_or_first_available_variant.featured_image | default: bundle_product.featured_image -%}
           <div class="product-bundle__item" data-variant-id="{{ bundle_product.selected_or_first_available_variant.id }}" data-price="{{ bundle_product.selected_or_first_available_variant.price }}">
             <div class="product-bundle__checkbox-wrapper">
-               <input type="checkbox" id="bundle-item-{{ bundle_product.id }}" class="product-bundle__checkbox" checked>
+              <input type="checkbox" id="bundle-item-{{ bundle_product.id }}" class="product-bundle__checkbox" checked>
             </div>
             <div class="product-bundle__image-wrapper">
-              {%- assign image = bundle_product.selected_or_first_available_variant.featured_image | default: bundle_product.featured_image -%}
-              {%- if image -%}
-                 <img src="{{ image | image_url: width: 100 }}" alt="{{ bundle_product.title | escape }}" loading="lazy" width="50" height="50" class="product-bundle__image">
+              {%- if bundle_image -%}
+                <img src="{{ bundle_image | image_url: width: 100 }}" alt="{{ bundle_product.title | escape }}" loading="lazy" width="50" height="50" class="product-bundle__image">
               {%- endif -%}
             </div>
             <div class="product-bundle__info">
@@ -84,36 +84,36 @@
       padding: var(--padding-md);
       margin-block: var(--gap);
     }
-    
+
     .product-bundle__heading {
       margin-top: 0;
       margin-bottom: var(--padding-sm);
       font-size: var(--font-size--md);
     }
-    
+
     .product-bundle__items {
       display: flex;
       flex-direction: column;
       gap: var(--padding-sm);
       margin-bottom: var(--padding-md);
     }
-    
+
     .product-bundle__item {
       display: flex;
       align-items: center;
       gap: var(--padding-sm);
     }
-    
+
     .product-bundle__checkbox-wrapper {
       display: flex;
       align-items: center;
     }
-    
+
     .product-bundle__checkbox {
       width: 18px;
       height: 18px;
     }
-    
+
     .product-bundle__image-wrapper {
       width: 50px;
       height: 50px;
@@ -126,36 +126,36 @@
       justify-content: center;
       background: var(--color-background-secondary);
     }
-    
+
     .product-bundle__image {
       max-width: 100%;
       height: auto;
       object-fit: cover;
     }
-    
+
     .product-bundle__info {
       flex-grow: 1;
       display: flex;
       flex-direction: column;
     }
-    
+
     .product-bundle__title {
       margin: 0;
       font-size: var(--font-size--sm);
       line-height: 1.2;
     }
-    
+
     .product-bundle__price {
       font-weight: 600;
       font-size: var(--font-size--sm);
       margin-top: 2px;
     }
-    
+
     .product-bundle__summary {
       border-top: 1px solid var(--color-border);
       padding-top: var(--padding-sm);
     }
-    
+
     .product-bundle__total {
       display: flex;
       justify-content: space-between;
@@ -164,7 +164,7 @@
       font-weight: bold;
       font-size: var(--font-size--md);
     }
-    
+
     .product-bundle__submit {
       width: 100%;
     }
