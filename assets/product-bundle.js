@@ -28,7 +28,10 @@ export class ProductBundleComponent extends Component {
         let total = 0;
         this.checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                total += parseInt(checkbox.dataset.price, 10);
+                const item = checkbox.closest('.product-bundle__item');
+                if (item) {
+                    total += parseInt(item.dataset.price, 10);
+                }
             }
         });
 
@@ -71,7 +74,9 @@ export class ProductBundleComponent extends Component {
             // Add selected members
             this.checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
-                    const variantId = checkbox.dataset.variantId;
+                    const item = checkbox.closest('.product-bundle__item');
+                    const variantId = item ? item.dataset.variantId : null;
+
                     if (variantId && variantId !== mainVariantId) {
                         itemsToAdd.push({
                             id: variantId,
